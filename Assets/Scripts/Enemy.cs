@@ -1,61 +1,59 @@
+using System.Collections;
 using UnityEngine;
+using DG.Tweening;
+using UnityEngine.UI;
 
 public class Enemy : MonoBehaviour
 {
-    public int HP;
+    public float HP;
+    public Image hpBar;
     public int damage;
     public float speed;
-    public float attackRange;
     Animator animator;
     SpriteRenderer spritetrenderer;
+    BoxCollider2D boxCollider2D;
     Transform target;
     bool isAttacking = false;
-    public string stateName = "Run";
-    public int lastLoopCount = 0;
+    bool isDead = false;
+    public bool isSlow = false; // skill3 적용
 
     void Start()
     {
         animator = GetComponent<Animator>();
         spritetrenderer = GetComponent<SpriteRenderer>();
+        boxCollider2D = GetComponent<BoxCollider2D>();
         animator.SetTrigger("Run");
         target = GameObject.FindGameObjectWithTag("Base").transform;
     }
     void Update()
     {
-        if (target != null && !isAttacking)
+        if (target != null && !isAttacking && !isDead)
         {
             MoveTowardsTarget();
-        }
-
-        if (isAttacking)
-        {
-            AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
-
-            if (stateInfo.IsName(stateName))
-            {
-                int currentLoopCount = Mathf.FloorToInt(stateInfo.normalizedTime);
-                if (currentLoopCount > lastLoopCount)
-                {
-                    lastLoopCount = currentLoopCount;
-                    DoDamage();
-                }
-            }
         }
     }
     void MoveTowardsTarget()
     {
         Vector3 direction = (target.position - transform.position).normalized;
+        if (direction.x >= 0)
+        {
+            spritetrenderer.flipX = false;
+        }
+        else
+        {
+            spritetrenderer.flipX = true;
+        }
         transform.position += direction * speed * Time.deltaTime;
     }
     void Attack()
     {
-        Vector2 diff = target.position - transform.position;
+        Vector2 diff = transform.position - target.position;
 
-        if (diff.y > 1.0f)
+        if (diff.y < 0.5f)
         {
             animator.SetTrigger("AttackUp");
         }
-        else if (diff.y < -1.0f)
+        else if (diff.y >= 0.5f)
         {
             animator.SetTrigger("AttackDown");
         }
@@ -84,18 +82,28 @@ public class Enemy : MonoBehaviour
             }
         }
     }
-    public void TakeDamage(int damageAmount)
+    public void TakeDamage(float damageAmount)
     {
         HP -= damageAmount;
+        if (spritetrenderer != null)
+        {
+            if (hpBar != null)
+            {
+                hpBar.DOFillAmount((float)HP / 100f, 0.5f).SetEase(Ease.InOutQuad);
+            }
+            StartCoroutine(HitAnimation());
+        }
         if (HP <= 0)
         {
+            boxCollider2D.enabled = false; // Disable collider to prevent further interactions
             Die();
         }
     }
     void Die()
     {
+        isDead = true;
         animator.SetTrigger("Die");
-        Destroy(gameObject, 2f); // Delay to allow death animation to play
+        Destroy(gameObject, 1.3f); // Delay to allow death animation to play
     }
     void OnTriggerEnter2D(Collider2D collision)
     {
@@ -104,5 +112,36 @@ public class Enemy : MonoBehaviour
             isAttacking = true;
             animator.SetTrigger("Attack");
         }
+    }
+    public void ApplySlow(float slowFactor, float duration)
+    {
+        if (isSlow) return; // 이미 느려진 상태라면 중복 적용 방지
+        StartCoroutine(ApplyeSlowCoroutine(slowFactor, duration));
+    }
+    IEnumerator ApplyeSlowCoroutine(float slowFactor, float duration)
+    {
+        isSlow = true;
+        float originalSpeed = speed;
+        speed *= slowFactor;
+
+        // 애니메이션 속도 조정
+        animator.speed *= slowFactor;
+
+        yield return new WaitForSeconds(duration);
+
+        isSlow = false;
+        // 원래 속도로 복귀
+        speed = originalSpeed;
+
+        // 애니메이션 속도 복원
+        animator.speed /= slowFactor;
+    }
+    IEnumerator HitAnimation()
+    {
+        spritetrenderer.DOColor(Color.red, 0.1f).OnComplete(() =>
+        {
+            spritetrenderer.DOColor(Color.white, 0.1f);
+        });
+        yield return null;
     }
 }

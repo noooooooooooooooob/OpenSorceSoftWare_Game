@@ -1,7 +1,12 @@
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class AttackController : MonoBehaviour
 {
+    [Header("스킬 1 UI")]
+    public Image skill1Image; // 스킬 1 이미지
+    public TMP_Text skill1Text; // 스킬 1 쿨다운 텍스트
     // 조준점(Crosshair) 관리 스크립트
     private CrosshairManager crosshairManager;
     // 메인 카메라
@@ -27,6 +32,7 @@ public class AttackController : MonoBehaviour
 
     // 스킬 1
     // --- 스킬 관련 변수 ---
+    public bool isSkillActive = false; // 스킬 활성화 상태
     private bool isBuffActive = false;
     private float buffEndTime = 0f;
     private float buffCooldownEndTime = 0f;
@@ -51,7 +57,7 @@ public class AttackController : MonoBehaviour
     void Update()
     {
         // 마우스 왼쪽 버튼 클릭 체크
-        if (Input.GetMouseButton(0))
+        if (Input.GetMouseButton(0) && !isSkillActive)
         {
             // 공격 쿨타임 체크
             if (Time.time >= nextAttackTime)
@@ -71,6 +77,20 @@ public class AttackController : MonoBehaviour
             isBuffActive = false;
 
             crosshairManager.ChangeCrosshairToDefault();
+        }
+        SkillUIUpdate();
+    }
+    void SkillUIUpdate()
+    {
+        if (isBuffActive)
+        {
+            return;
+        }
+        // 스킬 1 쿨다운 텍스트 업데이트
+        if (Time.time < buffCooldownEndTime)
+        {
+            skill1Text.text = ((int)(buffCooldownEndTime - Time.time)).ToString();
+            skill1Image.fillAmount = (buffCooldownEndTime - Time.time) / cooldownDuration;
         }
     }
 

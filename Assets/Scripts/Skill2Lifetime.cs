@@ -2,8 +2,8 @@ using UnityEngine;
 
 public class FireWallLifetime : MonoBehaviour
 {
-    public float lifetime = 5f;  // 5ÃÊ ÈÄ »ç¶óÁö°Ô (¿øÇÏ¸é Á¶Á¤)
-    public int damagePerSecond = 10;
+    public float lifetime = 5f;  // 5ì´ˆ í›„ì— íŒŒê´´
+    public float damagePerSecond = 10.0f;
 
     void Start()
     {
@@ -18,11 +18,8 @@ public class FireWallLifetime : MonoBehaviour
             Enemy enemyHealth = other.GetComponent<Enemy>();
             if (enemyHealth != null)
             {
-                enemyHealth.TakeDamage((int)(damagePerSecond * Time.deltaTime));
+                enemyHealth.TakeDamage(damagePerSecond * Time.deltaTime);
             }
         }
     }
-
-
-
 }
