@@ -49,4 +49,3 @@ public class SkillManager : MonoBehaviour
         return worldPos;
     }
 }
-
