@@ -46,11 +46,6 @@ public class Enemy : MonoBehaviour
     {
         Vector3 direction = (target.position - transform.position).normalized;
         transform.position += direction * speed * Time.deltaTime;
-
-        if (Vector3.Distance(transform.position, target.position) <= attackRange)
-        {
-            Attack();
-        }
     }
     void Attack()
     {
@@ -102,5 +97,12 @@ public class Enemy : MonoBehaviour
         animator.SetTrigger("Die");
         Destroy(gameObject, 2f); // Delay to allow death animation to play
     }
-
+    void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.CompareTag("base"))
+        {
+            isAttacking = true;
+            animator.SetTrigger("Attack");
+        }
+    }
 }
