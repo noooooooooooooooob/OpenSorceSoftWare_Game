@@ -18,7 +18,7 @@ public class Enemy : MonoBehaviour
         animator = GetComponent<Animator>();
         spritetrenderer = GetComponent<SpriteRenderer>();
         animator.SetTrigger("Run");
-        target = GameObject.FindGameObjectWithTag("base").transform;
+        target = GameObject.FindGameObjectWithTag("Base").transform;
     }
     void Update()
     {
@@ -46,11 +46,6 @@ public class Enemy : MonoBehaviour
     {
         Vector3 direction = (target.position - transform.position).normalized;
         transform.position += direction * speed * Time.deltaTime;
-
-        if (Vector3.Distance(transform.position, target.position) <= attackRange)
-        {
-            Attack();
-        }
     }
     void Attack()
     {
@@ -66,12 +61,12 @@ public class Enemy : MonoBehaviour
         }
         else if (diff.x >= 0)
         {
-            spritetrenderer.flipX = false; // Face right
+            spritetrenderer.flipX = true; // Face right
             animator.SetTrigger("Attack");
         }
         else if (diff.x < 0)
         {
-            spritetrenderer.flipX = true; // Face left
+            spritetrenderer.flipX = false; // Face left
             animator.SetTrigger("Attack");
         }
 
@@ -102,5 +97,12 @@ public class Enemy : MonoBehaviour
         animator.SetTrigger("Die");
         Destroy(gameObject, 2f); // Delay to allow death animation to play
     }
-
+    void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Base"))
+        {
+            isAttacking = true;
+            animator.SetTrigger("Attack");
+        }
+    }
 }
