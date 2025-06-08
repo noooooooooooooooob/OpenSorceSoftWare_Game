@@ -2,7 +2,13 @@ using UnityEngine;
 
 public class SkillManager : MonoBehaviour
 {
-    public GameObject fireWallPrefab;  // ºÒ Àåº® ÇÁ¸®ÆÕ
+    public GameObject skill3Prefab;  // ë‘”í™” ì§€ì—­ í”„ë¦¬íŒ¹
+    public GameObject skill4Prefab;  // ìœ„ì„± í­ê²© í”„ë¦¬íŒ¹
+
+    private bool isSkill3Selected = false;
+    private bool isSkill4Selected = false;
+    
+    public GameObject fireWallPrefab;  // ï¿½ï¿½ ï¿½åº® ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
     private bool isFireWallMode = false;
     private Vector2 firstClickPos;
@@ -10,53 +16,89 @@ public class SkillManager : MonoBehaviour
 
     void Update()
     {
-        // 2¹ø Å° ´©¸£¸é ½ºÅ³ ¸ğµå ÁøÀÔ
+      // 2ï¿½ï¿½ Å° ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Å³ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         if (Input.GetKeyDown(KeyCode.Alpha2))
         {
             isFireWallMode = true;
             waitingForSecondClick = false;
-            Debug.Log("FireWall ¸ğµå ON: Ã¹ ¹øÂ° Å¬¸¯À» ÇÏ¼¼¿ä.");
+            Debug.Log("FireWall ï¿½ï¿½ï¿½ ON: Ã¹ ï¿½ï¿½Â° Å¬ï¿½ï¿½ï¿½ï¿½ ï¿½Ï¼ï¿½ï¿½ï¿½.");
+        }
+        // í‚¤ ì…ë ¥ìœ¼ë¡œ ìŠ¤í‚¬ ì„ íƒ
+        if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            isSkill3Selected = true;
+            isSkill4Selected = false;
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha4))
+        {
+            isSkill3Selected = false;
+            isSkill4Selected = true;
         }
 
-        // ½ºÅ³ ¸ğµå Áß¿¡ ¸¶¿ì½º Å¬¸¯ °¨Áö
+        // ë§ˆìš°ìŠ¤ ì¢Œí´ë¦­ìœ¼ë¡œ ì‹œì „ ìœ„ì¹˜ ì„ íƒ
+        if (Input.GetMouseButtonDown(0))
+        {
+            Vector3 spawnPos = GetMouseWorldPosition();
+
+            if (isSkill3Selected)
+            {
+                Instantiate(skill3Prefab, spawnPos, Quaternion.identity);
+                isSkill3Selected = false;
+            }
+            else if (isSkill4Selected)
+            {
+                Instantiate(skill4Prefab, spawnPos, Quaternion.identity);
+                isSkill4Selected = false;
+            }
+        }
+        // ï¿½ï¿½Å³ ï¿½ï¿½ï¿½ ï¿½ß¿ï¿½ ï¿½ï¿½ï¿½ì½º Å¬ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         if (isFireWallMode && Input.GetMouseButtonDown(0))
         {
             Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
             if (!waitingForSecondClick)
             {
-                // Ã¹ ¹øÂ° Å¬¸¯: ½ÃÀÛÁ¡ ÀúÀå
+                // Ã¹ ï¿½ï¿½Â° Å¬ï¿½ï¿½: ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
                 firstClickPos = mousePos;
                 waitingForSecondClick = true;
-                Debug.Log("Ã¹ ¹øÂ° Å¬¸¯ ¿Ï·á: " + firstClickPos);
+                Debug.Log("Ã¹ ï¿½ï¿½Â° Å¬ï¿½ï¿½ ï¿½Ï·ï¿½: " + firstClickPos);
             }
             else
             {
-                // µÎ ¹øÂ° Å¬¸¯: ³¡Á¡ ÀúÀåÇÏ°í ºÒ Àåº® »ı¼º
+                // ï¿½ï¿½ ï¿½ï¿½Â° Å¬ï¿½ï¿½: ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï°ï¿½ ï¿½ï¿½ ï¿½åº® ï¿½ï¿½ï¿½ï¿½
                 Vector2 secondClickPos = mousePos;
                 CreateFireWall(firstClickPos, secondClickPos);
 
-                // ½ºÅ³ ¸ğµå Á¾·á
+                // ï¿½ï¿½Å³ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
                 isFireWallMode = false;
                 waitingForSecondClick = false;
-                Debug.Log("FireWall »ı¼º ¿Ï·á");
+                Debug.Log("FireWall ï¿½ï¿½ï¿½ï¿½ ï¿½Ï·ï¿½");
             }
         }
     }
 
+    // ë§ˆìš°ìŠ¤ ì¢Œí‘œ â†’ ì›”ë“œ ì¢Œí‘œ ë³€í™˜ (2D ê¸°ì¤€)
+    Vector3 GetMouseWorldPosition()
+    {
+        Vector3 mousePos = Input.mousePosition;
+        Vector3 worldPos = Camera.main.ScreenToWorldPoint(mousePos);
+        worldPos.z = 0f;
+        return worldPos;
+    }
+    
     void CreateFireWall(Vector2 start, Vector2 end)
     {
-        // µÎ Á¡ »çÀÌ Áß°£ ÁöÁ¡
+        // ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ß°ï¿½ ï¿½ï¿½ï¿½ï¿½
         Vector2 midPoint = (start + end) / 2f;
-        // µÎ Á¡ »çÀÌ °Å¸® (±æÀÌ)
+        // ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Å¸ï¿½ (ï¿½ï¿½ï¿½ï¿½)
         float distance = Vector2.Distance(start, end);
-        // µÎ Á¡ ¹æÇâ (°¢µµ °è»ê)
+        // ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½)
         Vector2 direction = end - start;
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
 
-        // ÇÁ¸®ÆÕ »ı¼º
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         GameObject wall = Instantiate(fireWallPrefab, midPoint, Quaternion.Euler(0, 0, angle));
-        // Scale Á¶Á¤ (XÃà ±æÀÌ¸¦ °Å¸®¸¸Å­ Á¶Á¤)
+        // Scale ï¿½ï¿½ï¿½ï¿½ (Xï¿½ï¿½ ï¿½ï¿½ï¿½Ì¸ï¿½ ï¿½Å¸ï¿½ï¿½ï¿½Å­ ï¿½ï¿½ï¿½ï¿½)
         wall.transform.localScale = new Vector3(distance, wall.transform.localScale.y, wall.transform.localScale.z);
     }
 }
