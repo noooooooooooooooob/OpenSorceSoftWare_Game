@@ -38,5 +38,3 @@ OpenSW개론 수업에서 진행한 프로젝트입니다.
   - 기능 단위로 `feature` 브랜치 생성
   - Pull Request(PR) 작성 후 코드 리뷰 및 병합
   - Scene 충돌 방지를 위해 개인 작업 Scene 분리
-
-## Build URL
